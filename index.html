@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07110b" />
+  <title>Uranium Client V1.5</title>
+
+  <style>
+    :root {
+      --bg: #050806;
+      --panel: rgba(10, 18, 13, 0.82);
+      --panel-2: rgba(14, 25, 18, 0.92);
+      --border: rgba(98, 255, 151, 0.18);
+      --green: #5dff92;
+      --green-2: #20d86a;
+      --green-dark: #0c6e38;
+      --white: #f4fff7;
+      --muted: #9eb4a5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(32, 216, 106, 0.13), transparent 32%),
+        radial-gradient(circle at 100% 100%, rgba(93, 255, 146, 0.07), transparent 28%),
+        var(--bg);
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Subtle background grid */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image:
+        linear-gradient(rgba(93, 255, 146, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93, 255, 146, 0.08) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at center, black 20%, transparent 82%);
+      -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 82%);
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      opacity: 0.12;
+    }
+
+    .orb.one {
+      width: 260px;
+      height: 260px;
+      background: #20d86a;
+      top: -90px;
+      left: -70px;
+    }
+
+    .orb.two {
+      width: 220px;
+      height: 220px;
+      background: #5dff92;
+      right: -80px;
+      bottom: -70px;
+    }
+
+    .shell {
+      width: min(92vw, 620px);
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel {
+      position: relative;
+      background: linear-gradient(
+        145deg,
+        rgba(17, 29, 20, 0.95),
+        rgba(7, 13, 9, 0.94)
+      );
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 38px;
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.58),
+        0 0 55px rgba(32, 216, 106, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 18%;
+      width: 64%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(93, 255, 146, 0.75),
+        transparent
+      );
+      box-shadow: 0 0 22px rgba(93, 255, 146, 0.38);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      margin-bottom: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(93, 255, 146, 0.18);
+      background: rgba(93, 255, 146, 0.06);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(93, 255, 146, 0.9);
+      animation: pulse 1.8s infinite ease-in-out;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      line-height: 1;
+      letter-spacing: -0.055em;
+      font-weight: 850;
+      color: var(--white);
+    }
+
+    .accent {
+      color: var(--green);
+      text-shadow: 0 0 26px rgba(93, 255, 146, 0.18);
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .launcher {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    select,
+    button {
+      width: 100%;
+      height: 58px;
+      border-radius: 15px;
+      font: inherit;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      color: var(--white);
+      background:
+        linear-gradient(45deg, transparent 50%, var(--green) 50%) calc(100% - 23px) 25px / 7px 7px no-repeat,
+        linear-gradient(135deg, var(--green) 50%, transparent 50%) calc(100% - 18px) 25px / 7px 7px no-repeat,
+        var(--panel-2);
+      border: 1px solid rgba(93, 255, 146, 0.16);
+      outline: none;
+      padding: 0 48px 0 17px;
+      cursor: pointer;
+      transition: 0.22s ease;
+    }
+
+    select:hover,
+    select:focus {
+      border-color: rgba(93, 255, 146, 0.45);
+      box-shadow:
+        0 0 0 4px rgba(93, 255, 146, 0.05),
+        0 0 24px rgba(93, 255, 146, 0.08);
+    }
+
+    option {
+      background: #0b120d;
+      color: #f4fff7;
+    }
+
+    button {
+      border: 0;
+      padding: 0 18px;
+      color: #031008;
+      background: linear-gradient(135deg, #8dffb4, #2ee36f);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow:
+        0 10px 28px rgba(32, 216, 106, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+      box-shadow:
+        0 15px 34px rgba(32, 216, 106, 0.24),
+        0 0 24px rgba(93, 255, 146, 0.12);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .support {
+      margin-top: 14px;
+      height: 54px;
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(93, 255, 146, 0.17);
+      box-shadow: none;
+    }
+
+    .support:hover {
+      background: rgba(93, 255, 146, 0.055);
+      border-color: rgba(93, 255, 146, 0.38);
+      box-shadow: 0 0 22px rgba(93, 255, 146, 0.07);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      margin: 26px 0 20px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: #74857a;
+      font-size: 12px;
+    }
+
+    .footer span:last-child {
+      color: #93a598;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 0.6;
+        transform: scale(0.9);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .shell {
+        width: min(94vw, 620px);
+        padding: 14px;
+      }
+
+      .panel {
+        padding: 28px 20px;
+        border-radius: 22px;
+      }
+
+      .launcher {
+        grid-template-columns: 1fr;
+      }
+
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
+  <main class="shell">
+    <section class="panel">
+      <div class="brand">
+        <div class="status">
+          <span class="status-dot"></span>
+          Uranium Client
+        </div>
+
+        <h1>Uranium Client <span class="accent">V1.5</span></h1>
+
+        <p class="subtitle">
+          Select a Minecraft version and launch the client.
+        </p>
+      </div>
+
+      <div class="launcher">
+        <div class="field">
+          <select id="version" aria-label="Select Minecraft version">
+            <option value="26.2">26.2</option>
+            <option value="1.12">1.12</option>
+            <option value="1.20">1.20</option>
+            <option value="Alpha">Alpha</option>
+          </select>
+        </div>
+
+        <button id="playButton" type="button">Play Client</button>
+      </div>
+
+      <button
+        id="supportButton"
+        class="support"
+        type="button"
+      >
+        Support
+      </button>
+
+      <div class="divider"></div>
+
+      <div class="footer">
+        <span>Uranium Client • V1.5</span>
+        <span>Select • Play • Enjoy</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const versionSelect = document.getElementById("version");
+    const playButton = document.getElementById("playButton");
+    const supportButton = document.getElementById("supportButton");
+
+    const clients = {
+      "26.2": "https://uraniumclient262.netlify.app/",
+      "1.12": "https://eagler112serv.netlify.app/",
+      "1.20": "https://mc1206.netlify.app/",
+      "Alpha": "https://mcalphauranium.netlify.app/"
+    };
+
+    playButton.addEventListener("click", () => {
+      const selectedVersion = versionSelect.value;
+      const destination = clients[selectedVersion];
+
+      if (destination) {
+        window.location.href = destination;
+      }
+    });
+
+    supportButton.addEventListener("click", () => {
+      window.location.href =
+        "https://docs.google.com/document/d/1dXqnwhcrCUMH1R1JHiUkmUPGIjCh8RbXJZD-xpeyySs/edit?usp=sharing";
+    });
+  </script>
+</body>
+</html>
